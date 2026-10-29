@@ -16,6 +16,11 @@
     "title": "GTA Vice City",
     "thumbnail": "/games/thumbs/vicecity.jpg",
     "file": "/games/files/vicecity/index.html"
+      },
+  {
+    "id": "gta-5",
+    "title": "gta 5",
+    "thumbnail": "/games/thumbs/
   },
   {
     "id": "idle-breakout",
