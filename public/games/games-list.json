@@ -20,7 +20,8 @@
   {
     "id": "gta-5",
     "title": "gta 5",
-    "thumbnail": "/games/thumbs/
+    "thumbnail": "/games/thumbs/images.png"
+    "link": "https://fiveplay.lol/"
   },
   {
     "id": "idle-breakout",
