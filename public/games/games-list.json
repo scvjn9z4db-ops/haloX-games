@@ -104,6 +104,12 @@
     "file": "/games/files/geometrydash/index.html"
   },
   {
+    "id": "gdlite",
+    "title": "Geometry Dash Lite",
+    "thumbnail": "/games/thumbs/images (1).jpeg",
+    "file": "/games/files/gdlite.html"
+  },
+  {
     "id": "cluster-rush",
     "title": "Cluster Rush",
     "thumbnail": "/games/thumbs/cluster-rush.jpg",
