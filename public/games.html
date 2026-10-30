@@ -59,8 +59,20 @@
     .modal-close:hover { border-color: var(--white); }
     .modal-full { background: transparent; border: 1px solid #2a2a2a; color: var(--white); font-family: 'Space Mono', monospace; font-size: 0.55rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 0.45rem 0.8rem; cursor: pointer; transition: all 0.15s; margin-right: 0.5rem; }
     .modal-full:hover { border-color: var(--white); }
-    .modal-body { flex: 1; position: relative; background: #000; }
+    .modal-stage { display: flex; flex: 1; min-height: 0; position: relative; }
+    .modal-body { flex: 1; min-width: 0; position: relative; background: #000; }
     .game-iframe { width: 100%; height: 100%; border: none; display: block; }
+    .movie-side { display: flex; flex-direction: column; width: min(38vw, 460px); min-width: 300px; flex-shrink: 0; border-left: 1px solid #2a2a2a; background: #0a0a0a; }
+    .movie-side.hidden { display: none; }
+    .movie-side iframe { width: 100%; height: 100%; min-height: 0; border: 0; }
+    .modal-movies { background: transparent; border: 1px solid #2a2a2a; color: var(--white); font-family: 'Space Mono', monospace; font-size: 0.55rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 0.45rem 0.8rem; cursor: pointer; transition: all 0.15s; margin-right: auto; }
+    .modal-movies:hover, .modal-movies[aria-expanded="true"] { border-color: var(--white); }
+    @media (max-width: 720px) {
+      .modal-stage { overflow: hidden; }
+      .movie-side { position: absolute; z-index: 20; inset: 0 0 0 auto; width: min(88vw, 420px); min-width: 0; box-shadow: -12px 0 30px rgba(0,0,0,0.5); }
+      .modal-header { gap: 0.35rem; padding: 0.6rem; }
+      .modal-full, .modal-close, .modal-movies { padding: 0.4rem 0.5rem; font-size: 0.48rem; }
+    }
 
     .loader { display: flex; align-items: center; justify-content: center; padding: 4rem; gap: 0.5rem; }
     .loader-dot { width: 6px; height: 6px; background: #333; border-radius: 50%; animation: pulse 1s ease infinite; }
@@ -213,11 +225,17 @@
 <div class="modal" id="game-modal">
   <div class="modal-header">
     <div class="modal-title" id="modal-title"></div>
+    <button class="modal-movies" id="movie-side-toggle" onclick="toggleMovieSide()" aria-expanded="false">Watch movies</button>
     <button class="modal-full" onclick="fullscreenGame()" id="full-btn">⛶ Fullscreen</button>
     <button class="modal-close" onclick="closeGame()">✕ Close</button>
   </div>
-  <div class="modal-body">
-    <iframe class="game-iframe" id="game-iframe" allow="autoplay; fullscreen"></iframe>
+  <div class="modal-stage">
+    <div class="modal-body">
+      <iframe class="game-iframe" id="game-iframe" allow="autoplay; fullscreen"></iframe>
+    </div>
+    <aside class="movie-side hidden" id="movie-side" aria-label="Movie player">
+      <iframe id="movie-side-frame" title="Movie browser" allow="autoplay; fullscreen; picture-in-picture; encrypted-media"></iframe>
+    </aside>
   </div>
 </div>
 
@@ -332,6 +350,7 @@
       window.open(game.url, "_blank", "noopener,noreferrer");
       return;
     }
+    resetMovieSide();
     document.getElementById("modal-title").textContent = game.title;
     document.getElementById("game-modal").classList.add("open");
     document.body.style.overflow = "hidden";
@@ -349,9 +368,30 @@
     }
   }
 
+  function toggleMovieSide() {
+    const panel = document.getElementById("movie-side");
+    const frame = document.getElementById("movie-side-frame");
+    const button = document.getElementById("movie-side-toggle");
+    const isOpening = panel.classList.contains("hidden");
+    panel.classList.toggle("hidden", !isOpening);
+    button.setAttribute("aria-expanded", String(isOpening));
+    button.textContent = isOpening ? "Hide movies" : "Watch movies";
+    frame.src = isOpening ? "/m" : "about:blank";
+  }
+
+  function resetMovieSide() {
+    const panel = document.getElementById("movie-side");
+    panel.classList.add("hidden");
+    document.getElementById("movie-side-frame").src = "about:blank";
+    const button = document.getElementById("movie-side-toggle");
+    button.setAttribute("aria-expanded", "false");
+    button.textContent = "Watch movies";
+  }
+
   function closeGame() {
     document.getElementById("game-modal").classList.remove("open");
     document.getElementById("game-iframe").src = "";
+    resetMovieSide();
     document.body.style.overflow = "";
   }
 

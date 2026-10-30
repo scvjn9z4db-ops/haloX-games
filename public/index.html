@@ -8,7 +8,7 @@
     @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Instrument+Serif:ital@0;1&display=swap');
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root { --black: #0a0a0a; --white: #f5f5f0; --gray: #888; --dim: #222; }
-    html, body { min-height: 100%; background: transparent; color: var(--white); font-family: 'Space Mono', monospace; overflow: hidden; }
+    html, body { min-height: 100%; background: transparent; color: var(--white); font-family: 'Space Mono', monospace; overflow-x: hidden; }
 
     /* grain */
     body::before { display: none; }
@@ -37,9 +37,9 @@
     .nav-label { font-size: 0.45rem; letter-spacing: 0.1em; text-transform: uppercase; }
 
     /* ── PAGE CONTENT ── */
-    .page { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; padding: 2rem; padding-bottom: 6rem; }
+    .page { display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 5vh 2rem 8rem; }
     .wordmark { font-family: 'Instrument Serif', serif; font-style: italic; font-size: clamp(3rem, 8vw, 6rem); letter-spacing: -0.02em; line-height: 1; margin-bottom: 0.15em; animation: fade-up 0.8s ease both; }
-    .tagline { font-size: 0.65rem; color: var(--gray); letter-spacing: 0.25em; text-transform: uppercase; margin-bottom: 3rem; animation: fade-up 0.8s 0.1s ease both; }
+    .tagline { font-size: 0.65rem; color: var(--gray); letter-spacing: 0.25em; text-transform: uppercase; margin-bottom: 1.5rem; animation: fade-up 0.8s 0.1s ease both; }
     .search-wrap { display: flex; width: 100%; max-width: 560px; border: 1px solid #2a2a2a; background: #111; animation: fade-up 0.8s 0.2s ease both; transition: border-color 0.2s; }
     .search-wrap:focus-within { border-color: var(--white); }
     #url-input { flex: 1; background: transparent; border: none; outline: none; color: var(--white); font-family: 'Space Mono', monospace; font-size: 0.8rem; padding: 1rem 1.2rem; caret-color: var(--white); }
@@ -53,6 +53,24 @@
     .corner { position: fixed; font-size: 0.5rem; letter-spacing: 0.15em; text-transform: uppercase; color: #2a2a2a; }
     .corner.tl { top: 1.5rem; left: 1.5rem; }
     .corner.br { bottom: 1.5rem; right: 1.5rem; }
+    .featured { width: min(520px, 100%); margin-top: 1.5rem; animation: fade-up 0.8s 0.35s ease both; }
+    .featured-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; margin-bottom: 0.8rem; text-align: left; }
+    .featured-title { font-family: 'Instrument Serif', serif; font-size: 1.65rem; font-style: italic; }
+    .featured-note { color: rgba(255,255,255,0.55) !important; font-size: 0.5rem; letter-spacing: 0.08em; text-align: right; }
+    .featured-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.4rem; }
+    .featured-card { min-width: 0; overflow: hidden; border: 1px solid rgba(255,255,255,0.16); border-radius: 8px; background: rgba(0,0,0,0.38); color: var(--white); text-decoration: none; transition: transform 0.2s, border-color 0.2s, background 0.2s; }
+    .featured-card:hover { transform: translateY(-3px); border-color: rgba(255,255,255,0.6); background: rgba(0,0,0,0.62); }
+    .featured-card img { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; }
+    .featured-copy { display: grid; gap: 0.2rem; padding: 0.4rem; text-align: left; }
+    .featured-name { font-size: 0.52rem; }
+    .featured-joke { color: rgba(255,255,255,0.58) !important; font-size: 0.4rem; line-height: 1.35; }
+    @media (max-width: 600px) {
+      .page { padding: 4rem 1rem 7rem; }
+      .featured-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.45rem; }
+      .featured { margin-top: 1.8rem; }
+      .featured-heading { align-items: flex-start; }
+      .featured-note { max-width: 45%; line-height: 1.5; }
+    }
 
     .welcome-screen { position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center; background: #0a0a0a; opacity: 1; visibility: visible; transition: opacity 0.45s ease, visibility 0.45s ease; }
     .welcome-screen.dismissed { opacity: 0; visibility: hidden; pointer-events: none; }
@@ -162,7 +180,7 @@
     <p class="welcome-title">Welcome Back</p>
     <div class="welcome-popup" role="status">
       <span class="welcome-popup-label">Unblocked game alert</span>
-      <p class="welcome-popup-message">The fun police are still buffering. Welcome back!</p>
+      <p class="welcome-popup-message" id="welcome-joke">The fun police are still buffering. Welcome back!</p>
       <span class="welcome-popup-footer">A very serious gaming operation</span>
     </div>
     <div class="welcome-loader" aria-hidden="true"></div>
@@ -180,8 +198,13 @@
     <input id="url-input" type="text" placeholder="enter a url or search query..." autocomplete="off" spellcheck="false" />
     <button id="go-btn">Go</button>
   </div>
-  
-  
+  <section class="featured" aria-labelledby="featured-title">
+    <div class="featured-heading">
+      <h2 class="featured-title" id="featured-title">Best games</h2>
+      <p class="featured-note">Four excellent reasons to miss your next break.</p>
+    </div>
+    <div class="featured-grid" id="featured-grid" aria-live="polite"></div>
+  </section>
 </div>
 
 <!-- floating nav -->
@@ -232,6 +255,159 @@
   }
 
   const welcomeScreen = document.getElementById("welcome-screen");
+  const jokes = [
+    "The fun police are still buffering. Welcome back!",
+    "Our loading screen has a six-second attention span.",
+    "We asked the games to behave. They pressed Start.",
+    "This site runs on pixels and unfinished homework.",
+    "Taking a break? Excellent. We support your very specific research.",
+    "The high score is just a number. A number we respect deeply.",
+    "Warning: may cause sudden confidence and very fast rematches.",
+    "Your keyboard called. It would like a coffee break.",
+    "I tried to pause real life, but the button was missing.",
+    "My game plan is simple: lose, learn, blame the controller.",
+    "The boss said it was the final level. The boss was lying.",
+    "I have a 100 percent win rate in games I have not started.",
+    "My character has more lives than my houseplant.",
+    "I went AFK and somehow my snack disappeared.",
+    "The tutorial said press any key. I pressed the space bar. It worked.",
+    "My high score is impressive if you ignore everyone else's.",
+    "I do not rage quit. I strategically stop playing loudly.",
+    "The loading bar is moving. Emotionally, I am not.",
+    "I picked the easy mode. The game picked violence.",
+    "My reflexes are fast. My decisions need an update.",
+    "I beat the level on my first try, after 47 first tries.",
+    "The game said press start. I have been starting all day.",
+    "My avatar has style. My gameplay has questions.",
+    "I call it button mashing. The game calls it a combo.",
+    "My strategy is mostly hoping the other player blinks.",
+    "The map is not confusing. It is just keeping secrets.",
+    "I finally found the exit. It was behind the giant sign saying EXIT.",
+    "The checkpoint saved me. My dignity remains unsaved.",
+    "My aim is improving. The wall is getting nervous.",
+    "I dodged the attack, then walked into the next one.",
+    "The game gave me one heart. I spent it on curiosity.",
+    "I am not lost. I am exploring the same hallway again.",
+    "My speedrun is going great if you measure it in scenic views.",
+    "I found a shortcut. It was longer than the regular route.",
+    "That was not a glitch. It was an unexpected feature with attitude.",
+    "My character fell off the map. We are both taking a moment.",
+    "The boss had one health point left. So did my patience.",
+    "I saved the game. Now I can lose with confidence.",
+    "I have mastered the controls except for the controls part.",
+    "My combo was so good even I did not see it coming.",
+    "The game offered a hint. I confidently ignored it.",
+    "I unlocked a new skin. My skills remain the default version.",
+    "I chose the stealth route and immediately made an entrance.",
+    "My inventory is full of things I might need someday.",
+    "I collected every coin except the one right in front of me.",
+    "The game said follow the path. I made a creative detour.",
+    "I hit the wrong button with remarkable consistency.",
+    "My controller has drift. It is exploring without me.",
+    "I thought I was winning. The scoreboard had other plans.",
+    "I practiced for hours. The tutorial is still proud of me.",
+    "My character jumped. My chair jumped too.",
+    "I beat my personal best. It was a very personal best.",
+    "I chose random and got exactly what I expected: chaos.",
+    "My timing is perfect, except when timing is required.",
+    "I found the secret level. It was secretly difficult.",
+    "I made one tiny mistake, and the level made it a big deal.",
+    "My opponent has a plan. I have enthusiasm.",
+    "I am carrying the team. The team is a backpack full of snacks.",
+    "The scoreboard is just a suggestion, right?",
+    "I pressed jump and got a very convincing crouch.",
+    "My character's outfit is legendary. My map awareness is not.",
+    "I found three hidden items and forgot where I put them.",
+    "The game is not hard. My thumbs are just on vacation.",
+    "I dodged perfectly, directly into a second problem.",
+    "I said one more round. The clock said absolutely not.",
+    "My new record lasted until my next attempt.",
+    "I chose the fastest car and drove like a shopping cart.",
+    "That landing was planned. The plan was to land somewhere.",
+    "I took the scenic route through every obstacle.",
+    "My car has excellent brakes. I have excellent late reactions.",
+    "The finish line was close enough to make this personal.",
+    "I drifted around the corner and into a new career path.",
+    "My racing strategy is to go fast and look surprised.",
+    "The ramp was optional. My flight was not.",
+    "I got first place in the imaginary post-race interview.",
+    "My car turned left. I had strongly suggested right.",
+    "I am great at parking, if the parking spot is the whole road.",
+    "The ball went in. I will now call that shot intentional.",
+    "I made a perfect pass to the other team.",
+    "The goalkeeper and I both guessed. The ball had a better guess.",
+    "I called timeout to discuss my snack strategy.",
+    "My team spirit is high. Our score is taking the stairs.",
+    "That was a tactical miss. Very tactical.",
+    "I scored in the wrong goal, but the enthusiasm was real.",
+    "The replay looks different when it is not happening to me.",
+    "My coach says keep your eye on the ball. I am trying to find it.",
+    "I made the highlight reel. It was the blooper reel.",
+    "The puzzle was easy once I saw the answer on the screen.",
+    "I solved it with logic, luck, and one accidental click.",
+    "I found the clue after walking past it eight times.",
+    "My brain loaded the answer just after the timer ended.",
+    "I chose the obvious option. The game admired my confidence.",
+    "The riddle had a simple answer and a complicated eyebrow raise.",
+    "I clicked every object. The solution was the first one.",
+    "The game gave me a puzzle. I gave it a long stare.",
+    "I have a plan for the next round. It is a different plan.",
+    "I lost track of time. Time seems to have won.",
+    "My gaming chair deserves an assist on that victory.",
+    "My snacks are in co-op mode: everyone gets a turn.",
+    "I reached the credits. The game finally knows my name."
+  ];
+  function randomJoke(excludedJoke = "") {
+    let joke;
+    do { joke = jokes[Math.floor(Math.random() * jokes.length)]; } while (joke === excludedJoke);
+    return joke;
+  }
+  const welcomeJoke = randomJoke();
+  document.getElementById("welcome-joke").textContent = welcomeJoke;
+  async function loadFeaturedGames() {
+    const grid = document.getElementById("featured-grid");
+    try {
+      const response = await fetch("/games/games-list.json");
+      if (!response.ok) throw new Error("Could not load games");
+      const games = (await response.json()).filter((game) => game.file && game.thumbnail);
+      for (let index = games.length - 1; index > 0; index--) {
+        const swapIndex = Math.floor(Math.random() * (index + 1));
+        [games[index], games[swapIndex]] = [games[swapIndex], games[index]];
+      }
+      const playableGames = [];
+      for (const game of games) {
+        const gameResponse = await fetch(game.file, { method: "HEAD" });
+        if (gameResponse.ok) playableGames.push(game);
+        if (playableGames.length === 4) break;
+      }
+      playableGames.forEach((game, index) => {
+        const card = document.createElement("a");
+        card.className = "featured-card";
+        card.href = game.file;
+
+        const image = document.createElement("img");
+        image.src = game.thumbnail;
+        image.alt = game.title;
+        image.loading = "lazy";
+
+        const copy = document.createElement("span");
+        copy.className = "featured-copy";
+        const name = document.createElement("span");
+        name.className = "featured-name";
+        name.textContent = game.title;
+        const joke = document.createElement("span");
+        joke.className = "featured-joke";
+        joke.textContent = randomJoke();
+
+        copy.append(name, joke);
+        card.append(image, copy);
+        grid.append(card);
+      });
+    } catch {
+      grid.textContent = "The games are taking a quick respawn.";
+    }
+  }
+  loadFeaturedGames();
   const dismissWelcome = () => welcomeScreen.classList.add("dismissed");
   window.setTimeout(dismissWelcome, 6000);
 </script>
