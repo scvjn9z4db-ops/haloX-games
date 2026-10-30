@@ -57,16 +57,25 @@
     .welcome-screen { position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center; background: #0a0a0a; opacity: 1; visibility: visible; transition: opacity 0.45s ease, visibility 0.45s ease; }
     .welcome-screen.dismissed { opacity: 0; visibility: hidden; pointer-events: none; }
     .welcome-content { display: grid; justify-items: center; gap: 1rem; padding: 1.5rem; text-align: center; }
-    .welcome-mark { color: #888; font-size: 0.55rem; letter-spacing: 0.18em; text-transform: uppercase; animation: welcome-in 0.55s ease both; }
-    .welcome-title { font-family: 'Instrument Serif', serif; font-size: 2.5rem; font-style: italic; animation: welcome-in 0.65s 0.12s ease both; }
-    .welcome-loader { width: 110px; height: 2px; overflow: hidden; background: #282828; }
-    .welcome-loader::after { display: block; width: 40%; height: 100%; background: var(--white); content: ''; animation: loading-line 0.9s ease-in-out infinite; }
+    .welcome-mark { display: flex; align-items: center; gap: 0.7rem; color: #888; font-size: 0.55rem; letter-spacing: 0.18em; text-transform: uppercase; animation: welcome-in 0.55s ease both; }
+    .welcome-mark::before, .welcome-mark::after { width: 24px; height: 1px; background: #555; content: ''; transform: scaleX(0); animation: welcome-rule 0.6s 0.25s ease forwards; }
+    .welcome-title { font-family: 'Instrument Serif', serif; font-size: 2.5rem; font-style: italic; animation: welcome-title-in 0.85s 0.2s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+    .welcome-note { color: #888; font-size: 0.55rem; letter-spacing: 0.14em; text-transform: uppercase; animation: welcome-in 0.6s 0.55s ease both; }
+    .welcome-loader { width: 160px; height: 2px; margin-top: 0.35rem; overflow: hidden; background: #282828; animation: welcome-in 0.6s 0.7s ease both; }
+    .welcome-loader::after { display: block; width: 100%; height: 100%; background: var(--white); content: ''; transform: scaleX(0); transform-origin: left; animation: loading-progress 6s linear both; }
+    .welcome-steps { display: flex; gap: 0.3rem; }
+    .welcome-steps span { width: 12px; height: 2px; background: #444; animation: step-light 1.5s ease-in-out infinite; }
+    .welcome-steps span:nth-child(2) { animation-delay: 0.2s; }
+    .welcome-steps span:nth-child(3) { animation-delay: 0.4s; }
 
     @keyframes fade-up { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes nav-in { from { opacity: 0; transform: translateX(-50%) translateY(16px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
     @keyframes welcome-in { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes loading-line { from { transform: translateX(-110%); } to { transform: translateX(280%); } }
-    @media (prefers-reduced-motion: reduce) { .welcome-mark, .welcome-title, .welcome-loader::after { animation: none; } }
+    @keyframes welcome-title-in { from { opacity: 0; transform: translateY(18px) scale(0.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
+    @keyframes welcome-rule { to { transform: scaleX(1); } }
+    @keyframes loading-progress { to { transform: scaleX(1); } }
+    @keyframes step-light { 0%, 100% { background: #333; } 50% { background: #eee; } }
+    @media (prefers-reduced-motion: reduce) { .welcome-mark, .welcome-mark::before, .welcome-mark::after, .welcome-title, .welcome-note, .welcome-loader, .welcome-loader::after, .welcome-steps span { animation: none; } .welcome-loader::after { transform: scaleX(1); } }
   
   /* ── VANTA READABILITY OVERRIDES ── */
   * { color: #ffffff !important; }
@@ -145,7 +154,9 @@
   <div class="welcome-content">
     <span class="welcome-mark">heloX</span>
     <p class="welcome-title">Welcome Back</p>
+    <p class="welcome-note">Your game library is ready</p>
     <div class="welcome-loader" aria-hidden="true"></div>
+    <div class="welcome-steps" aria-hidden="true"><span></span><span></span><span></span></div>
   </div>
 </div>
 
@@ -212,8 +223,7 @@
 
   const welcomeScreen = document.getElementById("welcome-screen");
   const dismissWelcome = () => welcomeScreen.classList.add("dismissed");
-    window.addEventListener("load", () => window.setTimeout(dismissWelcome, 450), { once: true });
-  window.setTimeout(dismissWelcome, 1600);
+  window.setTimeout(dismissWelcome, 6000);
 </script>
 
 <div id="vanta-bg" style="position:fixed;inset:0;z-index:-1;width:100%;height:100%;"></div>
