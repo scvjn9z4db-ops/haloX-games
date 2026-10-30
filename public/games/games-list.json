@@ -20,8 +20,8 @@
   {
     "id": "gta-5",
     "title": "gta 5",
-    "thumbnail": "/games/thumbs/images.png"
-    "link": "https://fiveplay.lol/"
+    "thumbnail": "/games/thumbs/images.png",
+    "url": "https://fiveplay.lol/"
   },
   {
     "id": "idle-breakout",
@@ -160,8 +160,8 @@
   {
     "id": "call-of-duty-black-ops-2",
     "title": "call of duty black ops 2",
-    "thumbnail": "public/games/thumbs/COD-BO2.webp",
-    "link": "https://vel.gg/bsz"
+    "thumbnail": "/games/thumbs/COD-BO2.webp",
+    "url": "https://vel.gg/bsz"
   },
   {
     "id": "bitlife",
@@ -202,7 +202,7 @@
   {
     "id": "minecraft-story-mode",
     "title": "minecraft story mode",
-    "thumbnail": "public/games/thumbs/Minecraft_Story_Mode_Square_Icon.webp",
-    "link": "https://mcsm-web.pages.dev/"
+    "thumbnail": "/games/thumbs/Minecraft_Story_Mode_Square_Icon.webp",
+    "url": "https://mcsm-web.pages.dev/"
   }
 ]
