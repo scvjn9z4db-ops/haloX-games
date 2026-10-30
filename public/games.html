@@ -85,14 +85,6 @@
     .suggest-label { font-size: 0.5rem; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(255,255,255,0.3); }
     .suggest-card:hover .suggest-label { color: rgba(255,255,255,0.7); }
 
-    /* ADD GAME CARD */
-    .add-game-card { background: rgba(0,0,0,0.2); border: 2px dashed rgba(255,255,255,0.15); border-radius: 10px; cursor: pointer; aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem; transition: border-color 0.2s, background 0.2s; }
-    .add-game-card:hover { border-color: rgba(255,255,255,0.5); background: rgba(255,255,255,0.05); }
-    .add-game-card svg { width: 28px; height: 28px; stroke: rgba(255,255,255,0.3); fill: none; stroke-width: 1.5; }
-    .add-game-card:hover svg { stroke: rgba(255,255,255,0.7); }
-    .add-game-label { font-size: 0.5rem; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(255,255,255,0.3); }
-    .add-game-card:hover .add-game-label { color: rgba(255,255,255,0.7); }
-
     /* ADD GAME MODAL */
     .add-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 600; align-items: center; justify-content: center; }
     .add-modal.open { display: flex; }
@@ -260,30 +252,30 @@
     if (override) {
       allGames = override;
     } else {
-      // Always load local curated games first
-      let base = [];
       try {
         const res = await fetch("/games/games-list.json");
-        if (res.ok) base = await res.json();
+        if (res.ok) allGames = await res.json();
       } catch {}
-
-      // Then fetch approved community games from central API
-      // Falls back gracefully if unreachable
-      let community = [];
-      try {
-        const centralUrl = "https://astriex.vercel.app/api/community-games";
-        const res = await fetch(centralUrl);
-        if (res.ok) community = await res.json();
-      } catch {}
-
-      allGames = [...base, ...community];
     }
-    // Always merge user-added games from localStorage
+    renderCatalog();
+
+    if (!override) {
+      try {
+        const res = await fetch("https://astriex.vercel.app/api/community-games");
+        if (res.ok) {
+          allGames = [...allGames, ...await res.json()];
+          renderCatalog();
+        }
+      } catch {}
+    }
+  }
+
+  function renderCatalog() {
+    const query = document.getElementById("search-input").value.trim().toLowerCase();
     const userGames = getUserGames().map(g => ({ ...g, _user: true }));
-    const merged = [...allGames, ...userGames];
+    const games = [...allGames, ...userGames];
     document.getElementById("controls").style.display = "flex";
-    renderGames(merged);
-    document.getElementById("loader").style.display = "none";
+    renderGames(query ? games.filter(g => g.title.toLowerCase().includes(query)) : games);
   }
 
   function renderGames(games) {
@@ -301,15 +293,8 @@
     suggestCard.href = "https://docs.google.com/forms/d/e/1FAIpQLScF9N42An_0b6aJ_GBgF1ksfDqkGkw7ni_tzxN25Y611UjJ6A/viewform";
     suggestCard.target = "_blank";
     suggestCard.rel = "noopener";
-    suggestCard.innerHTML = `<svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg><span class="suggest-label">Suggest Game</span>`;
+    suggestCard.innerHTML = `<svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg><span class="suggest-label">Request a Game</span>`;
     grid.appendChild(suggestCard);
-
-    // Add Game card
-    const addCard = document.createElement("div");
-    addCard.className = "add-game-card";
-    addCard.innerHTML = `<svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span class="add-game-label">Add Game</span>`;
-    addCard.addEventListener("click", openAddModal);
-    grid.appendChild(addCard);
 
     games.forEach((game, i) => {
       const card = document.createElement("div");
@@ -348,10 +333,9 @@
     document.body.style.overflow = "hidden";
     const iframe = document.getElementById("game-iframe");
     if (game.url) {
-      // External URL — run through UV proxy
       const prefix = (typeof __uv$config !== "undefined") ? __uv$config.prefix : "/uv/service/";
       const encode = (typeof __uv$config !== "undefined") ? __uv$config.encodeUrl : encodeURIComponent;
-      iframe.src = prefix + encode(game.url);
+      iframe.src = game.direct ? game.url : prefix + encode(game.url);
     } else if (game.blobContent) {
       // HTML content — write into blob URL
       const blob = new Blob([game.blobContent], { type: "text/html" });
@@ -538,17 +522,10 @@
   }
 
   function reloadGames() {
-    const userGames = getUserGames().map(g => ({ ...g, _user: true }));
-    allGames = [...allGames.filter(g => !g._user), ...userGames];
-    renderGames(allGames);
+    renderCatalog();
   }
 
-  document.getElementById("search-input").addEventListener("input", e => {
-    const q = e.target.value.trim().toLowerCase();
-    const userGames = getUserGames().map(g => ({ ...g, _user: true }));
-    const all = [...allGames.filter(g => !g._user), ...userGames];
-    renderGames(q ? all.filter(g => g.title.toLowerCase().includes(q)) : all);
-  });
+  document.getElementById("search-input").addEventListener("input", renderCatalog);
   document.addEventListener("keydown", e => { if (e.key === "Escape") closeGame(); });
 
   loadGames();

@@ -21,6 +21,7 @@
     "id": "gta-5",
     "title": "gta 5",
     "thumbnail": "/games/thumbs/images.png",
+    "direct": true,
     "url": "https://fiveplay.lol/"
   },
   {
@@ -161,6 +162,7 @@
     "id": "call-of-duty-black-ops-2",
     "title": "call of duty black ops 2",
     "thumbnail": "/games/thumbs/COD-BO2.webp",
+    "direct": true,
     "url": "https://vel.gg/bsz"
   },
   {
@@ -203,6 +205,7 @@
     "id": "minecraft-story-mode",
     "title": "minecraft story mode",
     "thumbnail": "/games/thumbs/Minecraft_Story_Mode_Square_Icon.webp",
+    "direct": true,
     "url": "https://mcsm-web.pages.dev/"
   }
 ]
