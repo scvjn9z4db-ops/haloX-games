@@ -158,10 +158,10 @@
     "file": "/games/files/non-folder/gun_spin.html"
   },
   {
-    "id": "crazy-cattle-3d",
-    "title": "Crazy Cattle 3D",
-    "thumbnail": "/games/thumbs/cc3d.png",
-    "file": "/games/files/non-folder/crazy_cattle_3d.html"
+    "id": "call-of-duty-black-ops-2",
+    "title": "call of duty black ops 2",
+    "thumbnail": "public/games/thumbs/COD-BO2.webp",
+    "link": "https://vel.gg/bsz"
   },
   {
     "id": "bitlife",
@@ -198,5 +198,11 @@
     "title": "ULTRAKILL",
     "thumbnail": "/games/thumbs/ultrakill.jpg",
     "file": "/games/files/ultrakill/index.html"
+      },
+  {
+    "id": "minecraft-story-mode",
+    "title": "minecraft story mode",
+    "thumbnail": "/games/thumbs/ultrakill.jpg",
+    "link": "https://mcsm-web.pages.dev/"
   }
 ]
