@@ -328,6 +328,10 @@
   }
 
   function openGame(game) {
+    if (game.url && game.direct) {
+      window.open(game.url, "_blank", "noopener,noreferrer");
+      return;
+    }
     document.getElementById("modal-title").textContent = game.title;
     document.getElementById("game-modal").classList.add("open");
     document.body.style.overflow = "hidden";

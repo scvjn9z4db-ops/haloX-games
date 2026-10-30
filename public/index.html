@@ -54,8 +54,19 @@
     .corner.tl { top: 1.5rem; left: 1.5rem; }
     .corner.br { bottom: 1.5rem; right: 1.5rem; }
 
+    .welcome-screen { position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center; background: #0a0a0a; opacity: 1; visibility: visible; transition: opacity 0.45s ease, visibility 0.45s ease; }
+    .welcome-screen.dismissed { opacity: 0; visibility: hidden; pointer-events: none; }
+    .welcome-content { display: grid; justify-items: center; gap: 1rem; padding: 1.5rem; text-align: center; }
+    .welcome-mark { color: #888; font-size: 0.55rem; letter-spacing: 0.18em; text-transform: uppercase; animation: welcome-in 0.55s ease both; }
+    .welcome-title { font-family: 'Instrument Serif', serif; font-size: 2.5rem; font-style: italic; animation: welcome-in 0.65s 0.12s ease both; }
+    .welcome-loader { width: 110px; height: 2px; overflow: hidden; background: #282828; }
+    .welcome-loader::after { display: block; width: 40%; height: 100%; background: var(--white); content: ''; animation: loading-line 0.9s ease-in-out infinite; }
+
     @keyframes fade-up { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes nav-in { from { opacity: 0; transform: translateX(-50%) translateY(16px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+    @keyframes welcome-in { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes loading-line { from { transform: translateX(-110%); } to { transform: translateX(280%); } }
+    @media (prefers-reduced-motion: reduce) { .welcome-mark, .welcome-title, .welcome-loader::after { animation: none; } }
   
   /* ── VANTA READABILITY OVERRIDES ── */
   * { color: #ffffff !important; }
@@ -125,10 +136,18 @@
   /* CSS ANIMATED BACKGROUND */ 33%{transform:translate(3%,-2%) scale(1.04)} 66%{transform:translate(-2%,3%) scale(0.97)} 100%{transform:translate(2%,1%) scale(1.02)} } 33%{transform:translate(-3%,2%) scale(0.98)} 66%{transform:translate(2%,-3%) scale(1.03)} 100%{transform:translate(-1%,-1%) scale(1)} }
 
 </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.clouds.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.clouds.min.js"></script>
 </head>
 <body>
+
+<div class="welcome-screen" id="welcome-screen" role="status" aria-label="Loading heloX">
+  <div class="welcome-content">
+    <span class="welcome-mark">heloX</span>
+    <p class="welcome-title">Welcome Back</p>
+    <div class="welcome-loader" aria-hidden="true"></div>
+  </div>
+</div>
 
 <span class="corner tl">heloX</span>
 <span class="corner br">v1.0.0</span>
@@ -190,11 +209,17 @@
       .then(() => {  })
       .catch((e) => {  });
   }
+
+  const welcomeScreen = document.getElementById("welcome-screen");
+  const dismissWelcome = () => welcomeScreen.classList.add("dismissed");
+    window.addEventListener("load", () => window.setTimeout(dismissWelcome, 450), { once: true });
+  window.setTimeout(dismissWelcome, 1600);
 </script>
 
 <div id="vanta-bg" style="position:fixed;inset:0;z-index:-1;width:100%;height:100%;"></div>
 <script>
-(function() {
+window.addEventListener("load", function() {
+  if (typeof VANTA === "undefined") return;
   var pref; try { pref = JSON.parse(localStorage.getItem('astriex_background') || '"clouds"'); } catch(e) { pref = 'clouds'; }
   if (pref === 'minimal') { document.getElementById('vanta-bg').style.background = '#2d2d2d'; return; }
   var speed = pref === 'clouds_slow' ? 0.60 : 1.60;
@@ -204,7 +229,7 @@
     cloudColor: 0x444444, cloudShadowColor: 0x818181, sunColor: 0x747474,
     sunGlareColor: 0x7c7c7c, sunlightColor: 0x474747, speed: speed
   });
-})();
+});
 </script>
 </body>
 </html>
