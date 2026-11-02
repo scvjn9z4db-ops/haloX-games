@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Apps - heloX</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Instrument+Serif:ital@0;1&display=swap');
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --white: #f5f5f0; --gray: #888; --line: rgba(255,255,255,0.12); }
+    html, body { min-height: 100%; background: #101010; color: var(--white); font-family: 'Space Mono', monospace; }
+    body { background-image: radial-gradient(ellipse at 12% 0%, rgba(84,62,132,0.22), transparent 34rem), linear-gradient(145deg, #121212, #090909 72%); }
+    .page { width: min(1120px, 100%); min-height: 100vh; margin: 0 auto; padding: 3.5rem 2rem 8rem; }
+    .page-header { display: flex; justify-content: space-between; align-items: flex-end; gap: 2rem; margin-bottom: 2rem; animation: fade-up 0.6s ease both; }
+    .page-title { font-family: 'Instrument Serif', serif; font-size: 3.5rem; font-style: italic; line-height: 1; }
+    .page-sub { margin-top: 0.75rem; color: var(--gray); font-size: 0.58rem; letter-spacing: 0.18em; text-transform: uppercase; }
+    .app-count { color: rgba(255,255,255,0.5); font-size: 0.55rem; letter-spacing: 0.14em; text-transform: uppercase; white-space: nowrap; }
+    .controls { display: flex; justify-content: flex-end; margin-bottom: 1.25rem; animation: fade-up 0.6s 0.08s ease both; }
+    .search-wrap { display: flex; width: min(100%, 360px); border: 1px solid var(--line); background: rgba(0,0,0,0.3); transition: border-color 0.2s; }
+    .search-wrap:focus-within { border-color: rgba(255,255,255,0.65); }
+    .search-wrap input { width: 100%; border: 0; outline: 0; padding: 0.75rem 0.9rem; background: transparent; color: var(--white); font: inherit; font-size: 0.65rem; }
+    .search-wrap input::placeholder { color: #777; }
+    .apps-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.65rem; animation: fade-up 0.6s 0.15s ease both; }
+    .app-card { display: flex; min-width: 0; min-height: 96px; align-items: center; gap: 0.9rem; padding: 0.9rem; border: 1px solid var(--line); background: rgba(255,255,255,0.035); color: var(--white); text-decoration: none; transition: background 0.18s, border-color 0.18s, transform 0.18s; }
+    .app-card[hidden] { display: none; }
+    .app-card:hover, .app-card:focus-visible { transform: translateY(-2px); border-color: rgba(255,255,255,0.48); background: rgba(255,255,255,0.075); outline: none; }
+    .app-icon { display: grid; width: 44px; height: 44px; flex: 0 0 44px; place-items: center; border: 1px solid rgba(255,255,255,0.22); border-radius: 8px; color: #fff; font-size: 0.75rem; font-weight: 700; }
+    .app-copy { display: grid; min-width: 0; gap: 0.3rem; }
+    .app-name { overflow: hidden; font-size: 0.68rem; text-overflow: ellipsis; white-space: nowrap; }
+    .app-domain { overflow: hidden; color: rgba(255,255,255,0.5); font-size: 0.52rem; text-overflow: ellipsis; white-space: nowrap; }
+    .empty-state { display: none; padding: 3rem 1rem; color: var(--gray); font-size: 0.65rem; text-align: center; }
+    .nav { position: fixed; bottom: 2rem; left: 50%; z-index: 300; display: flex; gap: 0.25rem; padding: 0.5rem 0.6rem; border: 1px solid #2a2a2a; background: rgba(0,0,0,0.76); transform: translateX(-50%); }
+    .nav-btn { position: relative; display: flex; width: 56px; height: 52px; flex-direction: column; align-items: center; justify-content: center; gap: 0.3rem; color: #777; text-decoration: none; transition: color 0.15s, background 0.15s; }
+    .nav-btn:hover { background: rgba(255,255,255,0.08); color: var(--white); }
+    .nav-btn.active { color: var(--white); }
+    .nav-btn.active::after { position: absolute; bottom: 4px; left: 50%; width: 4px; height: 4px; border-radius: 50%; background: currentColor; content: ''; transform: translateX(-50%); }
+    .nav-btn svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.5; }
+    .nav-label { font-size: 0.45rem; letter-spacing: 0.08em; text-transform: uppercase; }
+    @keyframes fade-up { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    @media (max-width: 900px) { .apps-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+    @media (max-width: 650px) {
+      .page { padding: 3rem 1rem 7rem; }
+      .page-header { align-items: flex-start; }
+      .page-title { font-size: 2.8rem; }
+      .apps-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.5rem; }
+      .app-card { min-height: 82px; gap: 0.65rem; padding: 0.65rem; }
+      .app-icon { width: 38px; height: 38px; flex-basis: 38px; }
+    }
+    @media (max-width: 380px) {
+      .page-header { display: block; }
+      .app-count { display: block; margin-top: 0.8rem; }
+      .apps-grid { grid-template-columns: 1fr; }
+    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; scroll-behavior: auto !important; transition-duration: 0.01ms !important; } }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="page-header">
+      <div>
+        <h1 class="page-title">Apps</h1>
+        <p class="page-sub">Everyday sites, one click away</p>
+      </div>
+      <p class="app-count" id="app-count"></p>
+    </header>
+    <div class="controls">
+      <label class="search-wrap">
+        <input id="app-search" type="search" placeholder="Find an app..." autocomplete="off" aria-label="Find an app" />
+      </label>
+    </div>
+    <section class="apps-grid" id="apps-grid" aria-label="Popular apps"></section>
+    <p class="empty-state" id="empty-state">No apps match that search.</p>
+  </main>
+
+  <nav class="nav" aria-label="Main navigation">
+    <a class="nav-btn" href="/" title="Home"><svg viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg><span class="nav-label">Home</span></a>
+    <a class="nav-btn" href="/g" title="Games"><svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 12h4M8 10v4"/><circle cx="15" cy="11" r="1"/><circle cx="17" cy="13" r="1"/></svg><span class="nav-label">Games</span></a>
+    <a class="nav-btn active" href="/a" title="Apps" aria-current="page"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span class="nav-label">Apps</span></a>
+    <a class="nav-btn" href="/m" title="Media"><svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg><span class="nav-label">Media</span></a>
+    <a class="nav-btn" href="/s" title="Settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 019 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg><span class="nav-label">Settings</span></a>
+  </nav>
+
+  <script src="/uv/uv.bundle.js"></script>
+  <script src="/uv/uv.config.js"></script>
+  <script src="/global.js"></script>
+  <script>
+    const apps = [
+      { name: "DuckDuckGo", url: "https://duckduckgo.com", mark: "D", color: "#de5833" },
+      { name: "Google", url: "https://www.google.com", mark: "G", color: "#4285f4" },
+      { name: "YouTube", url: "https://www.youtube.com", mark: "YT", color: "#e62117" },
+      { name: "TikTok", url: "https://www.tiktok.com", mark: "TT", color: "#111111" },
+      { name: "Instagram", url: "https://www.instagram.com", mark: "IG", color: "#b83c79" },
+      { name: "Discord", url: "https://discord.com/app", mark: "DC", color: "#5865f2" },
+      { name: "Reddit", url: "https://www.reddit.com", mark: "r/", color: "#ff4500" },
+      { name: "Spotify", url: "https://open.spotify.com", mark: "SP", color: "#1db954" },
+      { name: "Twitch", url: "https://www.twitch.tv", mark: "TW", color: "#9146ff" },
+      { name: "GitHub", url: "https://github.com", mark: "GH", color: "#24292f" },
+      { name: "Wikipedia", url: "https://www.wikipedia.org", mark: "W", color: "#666666" },
+      { name: "Gmail", url: "https://mail.google.com", mark: "GM", color: "#d93025" },
+      { name: "Pinterest", url: "https://www.pinterest.com", mark: "P", color: "#bd081c" },
+      { name: "X", url: "https://x.com", mark: "X", color: "#111111" },
+      { name: "Canva", url: "https://www.canva.com", mark: "C", color: "#00c4cc" },
+      { name: "Google Maps", url: "https://maps.google.com", mark: "M", color: "#34a853" }
+    ];
+    const grid = document.getElementById("apps-grid");
+    const search = document.getElementById("app-search");
+    const emptyState = document.getElementById("empty-state");
+    const cards = apps.map((app) => {
+      const card = document.createElement("a");
+      card.className = "app-card";
+      card.href = app.url;
+      card.dataset.search = `${app.name} ${new URL(app.url).hostname}`.toLowerCase();
+      const icon = document.createElement("span");
+      icon.className = "app-icon";
+      icon.style.backgroundColor = app.color;
+      icon.textContent = app.mark;
+      const copy = document.createElement("span");
+      copy.className = "app-copy";
+      const name = document.createElement("span");
+      name.className = "app-name";
+      name.textContent = app.name;
+      const domain = document.createElement("span");
+      domain.className = "app-domain";
+      domain.textContent = new URL(app.url).hostname;
+      copy.append(name, domain);
+      card.append(icon, copy);
+      card.addEventListener("click", (event) => {
+        event.preventDefault();
+        const prefix = typeof __uv$config !== "undefined" ? __uv$config.prefix : "/uv/service/";
+        const encode = typeof __uv$config !== "undefined" ? __uv$config.encodeUrl : encodeURIComponent;
+        window.location.href = prefix + encode(app.url);
+      });
+      grid.append(card);
+      return card;
+    });
+    document.getElementById("app-count").textContent = `${apps.length} shortcuts`;
+    search.addEventListener("input", () => {
+      const query = search.value.trim().toLowerCase();
+      let visible = 0;
+      cards.forEach((card) => {
+        const matches = card.dataset.search.includes(query);
+        card.hidden = !matches;
+        if (matches) visible++;
+      });
+      emptyState.style.display = visible ? "none" : "block";
+    });
+    if ("serviceWorker" in navigator) navigator.serviceWorker.register("/uv/sw.js", { scope: "/uv/service/" }).catch(() => {});
+  </script>
+</body>
+</html>

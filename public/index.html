@@ -75,6 +75,7 @@
     .welcome-screen { position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center; background: #0a0a0a; opacity: 1; visibility: visible; transition: opacity 0.45s ease, visibility 0.45s ease; }
     .welcome-screen.dismissed { opacity: 0; visibility: hidden; pointer-events: none; }
     .welcome-content { display: grid; justify-items: center; gap: 1rem; padding: 1.5rem; text-align: center; }
+    .welcome-logo { width: min(280px, 72vw); aspect-ratio: 3 / 1; object-fit: cover; object-position: center 54%; animation: welcome-title-in 0.85s 0.2s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
     .welcome-mark { display: flex; align-items: center; gap: 0.7rem; color: #888; font-size: 0.55rem; letter-spacing: 0.18em; text-transform: uppercase; animation: welcome-in 0.55s ease both; }
     .welcome-mark::before, .welcome-mark::after { width: 24px; height: 1px; background: #555; content: ''; transform: scaleX(0); animation: welcome-rule 0.6s 0.25s ease forwards; }
     .welcome-title { font-family: 'Instrument Serif', serif; font-size: 2.5rem; font-style: italic; animation: welcome-title-in 0.85s 0.2s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
@@ -176,7 +177,7 @@
 
 <div class="welcome-screen" id="welcome-screen" role="status" aria-label="Loading heloX">
   <div class="welcome-content">
-    <span class="welcome-mark">heloX</span>
+    <img class="welcome-logo" src="/img/HELOXLOGOV1.png" alt="heloX: play no matter what">
     <p class="welcome-title">Welcome Back</p>
     <div class="welcome-popup" role="status">
       <span class="welcome-popup-label">Unblocked game alert</span>
@@ -216,6 +217,10 @@
   <a class="nav-btn" href="/g" title="Games">
     <svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 12h4M8 10v4"/><circle cx="15" cy="11" r="1" fill="currentColor"/><circle cx="17" cy="13" r="1" fill="currentColor"/></svg>
     <span class="nav-label">Games</span>
+  </a>
+  <a class="nav-btn" href="/a" title="Apps">
+    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+    <span class="nav-label">Apps</span>
   </a>
   <a class="nav-btn" href="/m" title="Media">
     <svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>

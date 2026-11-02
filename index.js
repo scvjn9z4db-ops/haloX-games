@@ -106,6 +106,7 @@ async function denyGame(id) {
 
 // ── ROUTES ──
 app.get("/g",     (_req, res) => res.sendFile(join(__dirname, "public/games.html")));
+app.get("/a",     (_req, res) => res.sendFile(join(__dirname, "public/apps.html")));
 app.get("/m",     (_req, res) => res.sendFile(join(__dirname, "public/media.html")));
 app.get("/s",     (_req, res) => res.sendFile(join(__dirname, "public/settings.html")));
 app.get("/admin", (_req, res) => res.sendFile(join(__dirname, "public/admin.html")));
