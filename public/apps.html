@@ -4,12 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Apps - heloX</title>
+  <link rel="preconnect" href="https://bare-server.fly.dev" crossorigin />
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.clouds.min.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Instrument+Serif:ital@0;1&display=swap');
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root { --white: #f5f5f0; --gray: #888; --line: rgba(255,255,255,0.12); }
-    html, body { min-height: 100%; background: #101010; color: var(--white); font-family: 'Space Mono', monospace; }
-    body { background-image: radial-gradient(ellipse at 12% 0%, rgba(84,62,132,0.22), transparent 34rem), linear-gradient(145deg, #121212, #090909 72%); }
+    html, body { min-height: 100%; background: transparent; color: var(--white); font-family: 'Space Mono', monospace; }
+    #vanta-bg { position: fixed; inset: 0; z-index: -1; width: 100%; height: 100%; }
     .page { width: min(1120px, 100%); min-height: 100vh; margin: 0 auto; padding: 3.5rem 2rem 8rem; }
     .page-header { display: flex; justify-content: space-between; align-items: flex-end; gap: 2rem; margin-bottom: 2rem; animation: fade-up 0.6s ease both; }
     .page-title { font-family: 'Instrument Serif', serif; font-size: 3.5rem; font-style: italic; line-height: 1; }
@@ -24,7 +27,8 @@
     .app-card { display: flex; min-width: 0; min-height: 96px; align-items: center; gap: 0.9rem; padding: 0.9rem; border: 1px solid var(--line); background: rgba(255,255,255,0.035); color: var(--white); text-decoration: none; transition: background 0.18s, border-color 0.18s, transform 0.18s; }
     .app-card[hidden] { display: none; }
     .app-card:hover, .app-card:focus-visible { transform: translateY(-2px); border-color: rgba(255,255,255,0.48); background: rgba(255,255,255,0.075); outline: none; }
-    .app-icon { display: grid; width: 44px; height: 44px; flex: 0 0 44px; place-items: center; border: 1px solid rgba(255,255,255,0.22); border-radius: 8px; color: #fff; font-size: 0.75rem; font-weight: 700; }
+    .app-icon { position: relative; display: grid; width: 44px; height: 44px; flex: 0 0 44px; place-items: center; overflow: hidden; border: 1px solid rgba(255,255,255,0.22); border-radius: 8px; color: #fff; font-size: 0.75rem; font-weight: 700; }
+    .app-icon img { position: absolute; inset: 0; width: 100%; height: 100%; padding: 5px; background: #fff; object-fit: contain; }
     .app-copy { display: grid; min-width: 0; gap: 0.3rem; }
     .app-name { overflow: hidden; font-size: 0.68rem; text-overflow: ellipsis; white-space: nowrap; }
     .app-domain { overflow: hidden; color: rgba(255,255,255,0.5); font-size: 0.52rem; text-overflow: ellipsis; white-space: nowrap; }
@@ -55,6 +59,7 @@
   </style>
 </head>
 <body>
+  <div id="vanta-bg" aria-hidden="true"></div>
   <main class="page">
     <header class="page-header">
       <div>
@@ -84,6 +89,11 @@
   <script src="/uv/uv.config.js"></script>
   <script src="/global.js"></script>
   <script>
+    const proxyReady = "serviceWorker" in navigator
+      ? navigator.serviceWorker.register("/uv/sw.js", { scope: "/uv/service/" })
+        .then(() => navigator.serviceWorker.ready)
+        .catch(() => null)
+      : Promise.resolve(null);
     const apps = [
       { name: "DuckDuckGo", url: "https://duckduckgo.com", mark: "D", color: "#de5833" },
       { name: "Google", url: "https://www.google.com", mark: "G", color: "#4285f4" },
@@ -113,7 +123,15 @@
       const icon = document.createElement("span");
       icon.className = "app-icon";
       icon.style.backgroundColor = app.color;
-      icon.textContent = app.mark;
+      const mark = document.createElement("span");
+      mark.textContent = app.mark;
+      const favicon = document.createElement("img");
+      favicon.src = `https://www.google.com/s2/favicons?domain_url=${encodeURIComponent(app.url)}&sz=128`;
+      favicon.alt = "";
+      favicon.loading = "lazy";
+      favicon.decoding = "async";
+      favicon.addEventListener("error", () => favicon.remove(), { once: true });
+      icon.append(mark, favicon);
       const copy = document.createElement("span");
       copy.className = "app-copy";
       const name = document.createElement("span");
@@ -124,8 +142,13 @@
       domain.textContent = new URL(app.url).hostname;
       copy.append(name, domain);
       card.append(icon, copy);
-      card.addEventListener("click", (event) => {
+      card.addEventListener("click", async (event) => {
         event.preventDefault();
+        const registration = await proxyReady;
+        if (!registration?.active) {
+          window.location.href = app.url;
+          return;
+        }
         const prefix = typeof __uv$config !== "undefined" ? __uv$config.prefix : "/uv/service/";
         const encode = typeof __uv$config !== "undefined" ? __uv$config.encodeUrl : encodeURIComponent;
         window.location.href = prefix + encode(app.url);
@@ -144,7 +167,25 @@
       });
       emptyState.style.display = visible ? "none" : "block";
     });
-    if ("serviceWorker" in navigator) navigator.serviceWorker.register("/uv/sw.js", { scope: "/uv/service/" }).catch(() => {});
+  </script>
+  <script>
+    window.addEventListener("load", () => {
+      if (typeof VANTA === "undefined") return;
+      let preference;
+      try { preference = JSON.parse(localStorage.getItem("astriex_background") || '"clouds"'); }
+      catch { preference = "clouds"; }
+      if (preference === "minimal") {
+        document.getElementById("vanta-bg").style.background = "#2d2d2d";
+        return;
+      }
+      VANTA.CLOUDS({
+        el: "#vanta-bg", mouseControls: false, touchControls: false, gyroControls: false,
+        minHeight: 200, minWidth: 200, backgroundColor: 0x333333, skyColor: 0x292929,
+        cloudColor: 0x444444, cloudShadowColor: 0x818181, sunColor: 0x747474,
+        sunGlareColor: 0x7c7c7c, sunlightColor: 0x474747,
+        speed: preference === "clouds_slow" ? 0.6 : 1.6
+      });
+    });
   </script>
 </body>
 </html>
