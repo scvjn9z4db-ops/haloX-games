@@ -23,6 +23,7 @@
     .search-wrap:focus-within { border-color: rgba(255,255,255,0.65); }
     .search-wrap input { width: 100%; border: 0; outline: 0; padding: 0.75rem 0.9rem; background: transparent; color: var(--white); font: inherit; font-size: 0.65rem; }
     .search-wrap input::placeholder { color: #777; }
+    .proxy-status { margin: -0.5rem 0 1rem; color: #ff9a8b; font-size: 0.58rem; }
     .apps-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.65rem; animation: fade-up 0.6s 0.15s ease both; }
     .app-card { display: flex; min-width: 0; min-height: 96px; align-items: center; gap: 0.9rem; padding: 0.9rem; border: 1px solid var(--line); background: rgba(255,255,255,0.035); color: var(--white); text-decoration: none; transition: background 0.18s, border-color 0.18s, transform 0.18s; }
     .app-card[hidden] { display: none; }
@@ -73,6 +74,7 @@
         <input id="app-search" type="search" placeholder="Find an app..." autocomplete="off" aria-label="Find an app" />
       </label>
     </div>
+    <p class="proxy-status" id="proxy-status" role="status" aria-live="polite" hidden></p>
     <section class="apps-grid" id="apps-grid" aria-label="Popular apps"></section>
     <p class="empty-state" id="empty-state">No apps match that search.</p>
   </main>
@@ -115,10 +117,14 @@
     const grid = document.getElementById("apps-grid");
     const search = document.getElementById("app-search");
     const emptyState = document.getElementById("empty-state");
+    const proxyStatus = document.getElementById("proxy-status");
+    const uvConfig = typeof __uv$config !== "undefined" ? __uv$config : null;
+    const proxyPrefix = uvConfig?.prefix || "/uv/service/";
+    const encodeProxyUrl = uvConfig?.encodeUrl || encodeURIComponent;
     const cards = apps.map((app) => {
       const card = document.createElement("a");
       card.className = "app-card";
-      card.href = app.url;
+      card.href = proxyPrefix + encodeProxyUrl(app.url);
       card.dataset.search = `${app.name} ${new URL(app.url).hostname}`.toLowerCase();
       const icon = document.createElement("span");
       icon.className = "app-icon";
@@ -146,12 +152,12 @@
         event.preventDefault();
         const registration = await proxyReady;
         if (!registration?.active) {
-          window.location.href = app.url;
+          proxyStatus.textContent = "Ultraviolet could not start. Reload the page and try again.";
+          proxyStatus.hidden = false;
           return;
         }
-        const prefix = typeof __uv$config !== "undefined" ? __uv$config.prefix : "/uv/service/";
-        const encode = typeof __uv$config !== "undefined" ? __uv$config.encodeUrl : encodeURIComponent;
-        window.location.href = prefix + encode(app.url);
+        proxyStatus.hidden = true;
+        window.location.href = card.href;
       });
       grid.append(card);
       return card;
