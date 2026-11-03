@@ -91,9 +91,28 @@
   <script src="/uv/uv.config.js"></script>
   <script src="/global.js"></script>
   <script>
+    function waitForProxyRegistration(registration) {
+      const worker = registration.installing || registration.waiting || registration.active;
+      if (!worker) return Promise.resolve(null);
+      if (worker.state === "activated") return Promise.resolve(registration);
+      return new Promise((resolve) => {
+        const onStateChange = () => {
+          if (worker.state === "activated") {
+            worker.removeEventListener("statechange", onStateChange);
+            resolve(registration);
+          } else if (worker.state === "redundant") {
+            worker.removeEventListener("statechange", onStateChange);
+            resolve(null);
+          }
+        };
+        worker.addEventListener("statechange", onStateChange);
+        onStateChange();
+      });
+    }
+
     const proxyReady = "serviceWorker" in navigator
       ? navigator.serviceWorker.register("/uv/sw.js", { scope: "/uv/service/" })
-        .then(() => navigator.serviceWorker.ready)
+        .then(waitForProxyRegistration)
         .catch(() => null)
       : Promise.resolve(null);
     const apps = [
