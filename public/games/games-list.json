@@ -207,11 +207,12 @@
     "thumbnail": "/games/thumbs/Minecraft_Story_Mode_Square_Icon.webp",
     "direct": true,
     "url": "https://mcsm-web.pages.dev/"
-  }
+  },
   {
-	"id": "helox-launcher",
-	"title": "helox launcher",
-	"thumbnail": "public/games/thumbs/Red Pixelated Amazing Heart Card .png",
-	"link": "https://scvjn9z4db-ops.github.io/BNALauncher/"
-}
+    "id": "helox-launcher",
+    "title": "helox launcher",
+    "thumbnail": "/games/thumbs/Red Pixelated Amazing Heart Card .png",
+    "direct": true,
+    "url": "https://scvjn9z4db-ops.github.io/BNALauncher/"
+  }
 ]
