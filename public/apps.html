@@ -137,9 +137,9 @@
     const search = document.getElementById("app-search");
     const emptyState = document.getElementById("empty-state");
     const proxyStatus = document.getElementById("proxy-status");
-    const uvConfig = typeof __uv$config !== "undefined" ? __uv$config : null;
-    const proxyPrefix = uvConfig?.prefix || "/uv/service/";
-    const encodeProxyUrl = uvConfig?.encodeUrl || encodeURIComponent;
+    const proxyConfig = window.__uv$config || null;
+    const proxyPrefix = proxyConfig?.prefix || "/uv/service/";
+    const encodeProxyUrl = proxyConfig?.encodeUrl || encodeURIComponent;
     const cards = apps.map((app) => {
       const card = document.createElement("a");
       card.className = "app-card";
