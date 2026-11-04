@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Custom title art for Moto X3M Spooky Land">
+<defs>
+  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="hsl(311,74%,30%)"/><stop offset=".52" stop-color="hsl(339,64%,18%)"/><stop offset="1" stop-color="#090b16"/></linearGradient>
+  <radialGradient id="glow"><stop stop-color="hsl(96,95%,70%)" stop-opacity=".42"/><stop offset="1" stop-color="hsl(96,95%,50%)" stop-opacity="0"/></radialGradient>
+  <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M32 0H0V32" fill="none" stroke="#fff" stroke-opacity=".055"/></pattern>
+  <style>.wordmark{font:900 46px system-ui,-apple-system,sans-serif;fill:#fff;text-anchor:middle;letter-spacing:-1.6px;paint-order:stroke;stroke:#080912;stroke-width:9px;stroke-linejoin:round;filter:drop-shadow(0 5px 0 rgba(0,0,0,.4))}.eyebrow{font:700 12px system-ui,sans-serif;fill:#fff;fill-opacity:.7;letter-spacing:3.2px}.caption{font:700 11px system-ui,sans-serif;fill:#fff;fill-opacity:.6;letter-spacing:2.6px}</style>
+</defs>
+<rect width="512" height="512" rx="34" fill="url(#bg)"/>
+<rect width="512" height="512" rx="34" fill="url(#grid)"/>
+<circle cx="371" cy="104" r="158" fill="url(#glow)"/>
+<g transform="translate(256 250) rotate(290)" fill="none" stroke="hsl(96,95%,78%)" stroke-opacity=".17" stroke-width="2">
+  <path d="M0-204 28-28 204 0 28 28 0 204-28 28-204 0-28-28Z"/>
+  <circle r="164"/><circle r="184" stroke-dasharray="3 12"/>
+</g>
+<path d="M35 86h46M35 94h26M431 412h46M451 420h26" stroke="hsl(96,95%,78%)" stroke-opacity=".75" stroke-width="3" stroke-linecap="round"/>
+<rect x="34" y="34" width="444" height="444" rx="25" fill="none" stroke="#fff" stroke-opacity=".16"/>
+<text x="42" y="66" class="eyebrow">OFFLINE GAME</text>
+<g transform="translate(438 59)" fill="none" stroke="#fff" stroke-opacity=".78" stroke-width="2.5" stroke-linejoin="round">
+  <path d="M-10-12 12 0-10 12Z" fill="#fff" fill-opacity=".16"/><circle r="21" stroke-opacity=".28"/>
+</g>
+<text x="256" y="243" class="wordmark">MOTO X3M SPOOKY</text><text x="256" y="297" class="wordmark">LAND</text>
+<path d="M64 350h384" stroke="#fff" stroke-opacity=".24"/>
+<path d="M64 350h100" stroke="hsl(96,95%,72%)" stroke-width="4" stroke-linecap="round"/>
+<text x="64" y="389" class="caption">CUSTOM GAME TITLE</text>
+<text x="448" y="449" class="caption" text-anchor="end">HTML GAMES PACK</text>
+</svg>
