@@ -254,6 +254,39 @@
   let allGames = [];
   let remoteGameController = null;
   let remoteGameBlobUrl = null;
+  let gameLoadId = 0;
+
+  function waitForProxyRegistration(registration) {
+    const worker = registration.installing || registration.waiting || registration.active;
+    if (!worker) return Promise.resolve(null);
+    if (worker.state === "activated") return Promise.resolve(registration);
+    return new Promise((resolve) => {
+      const onStateChange = () => {
+        if (worker.state === "activated") {
+          worker.removeEventListener("statechange", onStateChange);
+          resolve(registration);
+        } else if (worker.state === "redundant") {
+          worker.removeEventListener("statechange", onStateChange);
+          resolve(null);
+        }
+      };
+      worker.addEventListener("statechange", onStateChange);
+      onStateChange();
+    });
+  }
+
+  let gameProxyReady;
+
+  function getGameProxyReady() {
+    if (!gameProxyReady) {
+      gameProxyReady = "serviceWorker" in navigator
+        ? navigator.serviceWorker.register("/uv/sw.js", { scope: "/uv/service/" })
+          .then(waitForProxyRegistration)
+          .catch(() => null)
+        : Promise.resolve(null);
+    }
+    return gameProxyReady;
+  }
 
   function releaseRemoteGame() {
     if (remoteGameController) remoteGameController.abort();
@@ -356,7 +389,8 @@
       </div>`;
   }
 
-  function openGame(game) {
+  async function openGame(game) {
+    const loadId = ++gameLoadId;
     const iframe = document.getElementById("game-iframe");
     const loadStatus = document.getElementById("game-load-status");
     iframe.onload = null;
@@ -373,9 +407,28 @@
     document.getElementById("game-modal").classList.add("open");
     document.body.style.overflow = "hidden";
     if (game.url) {
-      const prefix = (typeof __uv$config !== "undefined") ? __uv$config.prefix : "/uv/service/";
-      const encode = (typeof __uv$config !== "undefined") ? __uv$config.encodeUrl : encodeURIComponent;
-      iframe.src = game.direct ? game.url : prefix + encode(game.url);
+      if (game.url.startsWith("https://raw.githack.com/")) {
+        loadStatus.textContent = `Loading ${game.title}...`;
+        loadStatus.hidden = false;
+        iframe.onload = () => {
+          if (loadId === gameLoadId) loadStatus.hidden = true;
+        };
+        iframe.src = game.url;
+        return;
+      }
+      loadStatus.textContent = `Starting the game proxy...`;
+      loadStatus.hidden = false;
+      const registration = await getGameProxyReady();
+      if (loadId !== gameLoadId) return;
+      if (!registration?.active) {
+        loadStatus.setAttribute("role", "alert");
+        loadStatus.textContent = `Couldn't load ${game.title}: the game proxy could not start. Reload the page and try again.`;
+        return;
+      }
+      iframe.onload = () => {
+        if (loadId === gameLoadId) loadStatus.hidden = true;
+      };
+      iframe.src = proxyUrl(game.url);
     } else if (game.remoteHtml) {
       const controller = new AbortController();
       remoteGameController = controller;
@@ -430,6 +483,7 @@
   }
 
   function closeGame() {
+    gameLoadId += 1;
     document.getElementById("game-modal").classList.remove("open");
     const iframe = document.getElementById("game-iframe");
     iframe.onload = null;

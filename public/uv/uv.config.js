@@ -2,7 +2,7 @@
 
 const uvConfig = {
   prefix: "/uv/service/",
-  bare: "https://bare-server.fly.dev/",
+  bare: "/bare/",
   encodeUrl: Ultraviolet.codec.xor.encode,
   decodeUrl: Ultraviolet.codec.xor.decode,
   handler: "/uv/uv.handler.js",

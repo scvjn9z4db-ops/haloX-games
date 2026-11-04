@@ -2,10 +2,48 @@ import express from "express";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 import fs from "fs";
+import { createBareServer } from "@tomphttp/bare-server-node";
 const { readFileSync, writeFileSync, existsSync } = fs;
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
+const bareServer = createBareServer("/bare/", { logErrors: process.env.NODE_ENV !== "production" });
+app.use((req, res, next) => {
+  if (bareServer.shouldRoute(req)) {
+    const destination = req.headers["x-bare-url"];
+    const bareHeaders = req.headers["x-bare-headers"];
+    if (typeof destination === "string" && typeof bareHeaders === "string") {
+      let remote;
+      try {
+        remote = new URL(destination);
+      } catch {
+        void bareServer.routeRequest(req, res);
+        return;
+      }
+
+      let headers;
+      try {
+        headers = JSON.parse(bareHeaders);
+      } catch (error) {
+        if (!(error instanceof SyntaxError)) throw error;
+        void bareServer.routeRequest(req, res);
+        return;
+      }
+
+      if (headers && typeof headers === "object" && !Array.isArray(headers)) {
+        // Bare's Node transport disables Node's automatic Host header.
+        for (const name of Object.keys(headers)) {
+          if (name.toLowerCase() === "host") delete headers[name];
+        }
+        headers.host = remote.host;
+        req.headers["x-bare-headers"] = JSON.stringify(headers);
+      }
+    }
+    void bareServer.routeRequest(req, res);
+    return;
+  }
+  next();
+});
 app.use(express.json({ limit: "5mb" }));
 app.use(express.static(join(__dirname, "public")));
 
@@ -167,7 +205,14 @@ app.use("*", (_req, res) => res.sendFile(join(__dirname, "public/index.html")));
 
 const port = process.env.PORT || 3000;
 if (process.env.NODE_ENV !== "production") {
-  app.listen(port, () => console.log(`Running on ${port}`));
+  const server = app.listen(port, () => console.log(`Running on ${port}`));
+  server.on("upgrade", (req, socket, head) => {
+    if (bareServer.shouldRoute(req)) {
+      void bareServer.routeUpgrade(req, socket, head);
+      return;
+    }
+    socket.destroy();
+  });
 }
 
 export default app;
